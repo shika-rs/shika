@@ -1,0 +1,12 @@
+[package]
+name = "api_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+shika.workspace = true
+shika_auth.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+axum = { version = "0.7.5", features = ["http2", "http1", "tokio"] }

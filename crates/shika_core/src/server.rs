@@ -1,16 +1,16 @@
 use std::{sync::Arc, future::Future, process::exit};
-use hyper::server::conn::http1;
-use hyper_util::rt::TokioIo;
+use hyper_util::rt::{TokioExecutor, TokioIo};
 use tokio::net::TcpListener;
 use tracing::{error, info};
+use hyper_util::server::conn::auto::Builder;
 
 use crate::exchange::Request;
 use crate::handler::HandlerService;
 
-pub async fn serve<Handler, ResponseFuture>(address: &str, handler: Handler)
+pub async fn serve<Handler, HandlerFuture>(address: &str, handler: Handler) -> anyhow::Result<()>
 where
-    Handler: Fn(Request) -> ResponseFuture + Send + Sync + 'static,
-    ResponseFuture: Future<Output = anyhow::Result<String>> + Send + 'static
+    Handler: Fn(Request) -> HandlerFuture + Send + Sync + 'static,
+    HandlerFuture: Future<Output = anyhow::Result<String>> + Send + 'static
 {
     tracing_subscriber::fmt::init();
 
@@ -33,12 +33,15 @@ where
 
         let service = HandlerService::new(Arc::clone(&handler));
 
-        tokio::task::spawn(async move {
-            if let Err(error) = http1::Builder::new()
-                .serve_connection(io, service)
-            .await {
-                error!("Error: {error}")
+        tokio::spawn(async move {
+            if let Err(error) = Builder::new(TokioExecutor::new())
+                .serve_connection_with_upgrades(io, service)
+                .await
+            {
+                return Err(error)
             }
+
+            Ok(())
         });
     }
 }

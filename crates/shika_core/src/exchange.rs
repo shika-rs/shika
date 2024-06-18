@@ -6,8 +6,6 @@ pub enum Method {
     Delete
 }
 
-pub type RawRequest<T = hyper::body::Incoming> = http::Request<T>;
-
 pub type RequestParts = http::request::Parts;
 pub type RequestBody = hyper::body::Incoming;
 
