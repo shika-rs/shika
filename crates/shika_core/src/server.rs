@@ -4,12 +4,13 @@ use hyper_util::rt::TokioIo;
 use tokio::net::TcpListener;
 use tracing::{error, info};
 
+use crate::exchange::Request;
 use crate::handler::HandlerService;
 
-pub async fn serve<F, Fut>(address: &str, handler: F)
+pub async fn serve<Handler, ResponseFuture>(address: &str, handler: Handler)
 where
-    F: Fn() -> Fut + Send + Sync + 'static,
-    Fut: Future + Send + 'static
+    Handler: Fn(Request) -> ResponseFuture + Send + Sync + 'static,
+    ResponseFuture: Future<Output = anyhow::Result<String>> + Send + 'static
 {
     tracing_subscriber::fmt::init();
 
@@ -27,7 +28,7 @@ where
     let handler = Arc::new(handler);
 
     loop {
-        let (stream, address) = listener.accept().await.unwrap();
+        let (stream, _address) = listener.accept().await.unwrap();
         let io = TokioIo::new(stream);
 
         let service = HandlerService::new(Arc::clone(&handler));

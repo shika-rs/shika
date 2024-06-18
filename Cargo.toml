@@ -3,12 +3,14 @@ resolver = "2"
 members = ["crates/shika", "crates/shika_core"]
 
 [workspace.dependencies]
-shika_core.path = "shika_core"
+shika_core.path = "crates/shika_core"
 
 tokio = { version = "1.38.0", features = ["full"] }
 hyper = { version = "1.3.1", features = ["full"] }
+http = { version = "1.1.0" }
 hyper-util = { version = "0.1", features = ["full"] }
 http-body-util = { version = "0.1.1" }
 anyhow = { version = "1.0.86" }
 tracing = { version = "0.1.40" }
 tracing-subscriber = { version = "0.3.18", features = ["tracing"] }
+serde = { version = "1.0.203", features = ["derive"] }
