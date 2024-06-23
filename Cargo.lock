@@ -33,6 +33,7 @@ dependencies = [
  "shika",
  "shika_auth",
  "tokio",
+ "tracing-subscriber",
 ]
 
 [[package]]

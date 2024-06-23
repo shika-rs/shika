@@ -1,30 +1,32 @@
-use anyhow::Result;
 use serde::Deserialize;
-use shika::{extract::Extract, Request, serve};
-use shika::extract::Query;
-use shika_auth::authorize;
-use shika_auth::rbac::{Client, Permission};
+use shika::extract::{Query, Extract};
+use shika::prelude::*;
+use shika::Server;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    serve("0.0.0.0:8081", handler).await.unwrap();
+    tracing_subscriber::fmt::init();
+
+    Server::bind("0.0.0.0:8081", handler)
+        .start()
+        .await?;
 
     Ok(())
 }
 
 #[derive(Deserialize)]
-struct QueryParams {
-    pub permission: String
+struct HandlerQuery {
+    name: String,
+    age: usize,
+    country: Option<String>
 }
-
 async fn handler(req: Request) -> Result<String> {
-    let query: QueryParams = Query::extract(&req)?;
+    let HandlerQuery { name, age, country } = Query::extract(&req)?;
 
-    let client = Client {
-        permissions: vec![Permission::Read(query.permission)]
+    let country = match country {
+        Some(country) => country,
+        None => "Unknown".to_string()
     };
 
-    authorize!(client, [Permission::Read("users".to_string())]);
-
-    Ok("Hello, Worldie!".to_string())
+    Ok(format!("Hello, {name}! You are {age} years old. Country: {country}"))
 }

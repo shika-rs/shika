@@ -9,12 +9,12 @@ where
     T: DeserializeOwned
 {
     fn extract(request: &Request) -> anyhow::Result<T> {
-        let query = request.parts.uri.query().unwrap_or_default();
+        let query = &request.0.uri.query().unwrap_or_default();
         let params = serde_urlencoded::from_str(query);
 
         match params {
             Ok(params) => Ok(params),
-            Err(_) => Err(anyhow!("Could not parse query"))
+            Err(error) => Err(anyhow!(error.to_string()))
         }
     }
 }

@@ -8,3 +8,17 @@ impl Router {
         Err(anyhow!("An error occurred"))
     }
 }
+
+pub struct Builder {
+
+}
+
+impl Builder {
+    pub fn new() -> Self {
+        Builder {}
+    }
+
+    pub fn build(self) -> Router {
+        Router {}
+    }
+}
